@@ -2,7 +2,7 @@ name: Build For game-2048
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   build:
@@ -65,7 +65,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: ${{ env.GIT_REPO }}
-          ref: 'origin'
+          ref: 'main'
           token: ${{ env.GIT_ACCESS_TOKEN }}
 
       - name: Image Tag Change
@@ -79,7 +79,7 @@ jobs:
         with:
           token: ${{ env.GIT_ACCESS_TOKEN }}
           commit-message: 'deploy: game2048-${{ env.HASH }}'
-          base: master
+          base: main
           branch: game2048-${{ env.HASH }}
           title: 'deploy: game2048-${{ env.HASH }}'
           labels: |
