@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Build front
         run: |
@@ -17,7 +17,7 @@ jobs:
           npm run build
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -58,14 +58,14 @@ jobs:
       IMAGE_TAG: ${{ needs.build.outputs.image_tag }}
       GIT_ACCESS_TOKEN: ${{ secrets.ACTION_TOKEN }}
       HASH: ${{ needs.build.outputs.sha }}
-      GIT_REPO: kimwoosung-debug/aws-app-repo
+      GIT_REPO: kimwoosung-debug/-aws-manifest-repo
 
     steps:
       - name: Clone Deploy repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: ${{ env.GIT_REPO }}
-          ref: 'master'
+          ref: 'origin'
           token: ${{ env.GIT_ACCESS_TOKEN }}
 
       - name: Image Tag Change
@@ -75,7 +75,7 @@ jobs:
 
       - name: Create Pull Request
         id: cpr
-        uses: peter-evans/create-pull-request@v3
+        uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ env.GIT_ACCESS_TOKEN }}
           commit-message: 'deploy: game2048-${{ env.HASH }}'
