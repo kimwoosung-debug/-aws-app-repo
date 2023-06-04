@@ -69,7 +69,7 @@ jobs:
           token: ${{ env.GIT_ACCESS_TOKEN }}
 
       - name: Image Tag Change
-        uses: mikefarah/yq@v4.34.1
+        uses: mikefarah/yq@v4.9.6
         with:
           cmd: yq e --inplace '.image.tag = "${{ env.IMAGE_TAG }}"' service/game2048/values.yaml
 
