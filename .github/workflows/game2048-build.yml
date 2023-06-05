@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
       - name: Build front
         run: |
@@ -17,7 +17,7 @@ jobs:
           npm run build
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -32,7 +32,7 @@ jobs:
         run: |
           VERSION=$(echo ${{ github.sha }} | cut -c1-5)
           echo VERSION=$VERSION
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "::set-output name=version::$VERSION"
 
       - name: Build, tag, and push image to Amazon ECR
         id: image-info
@@ -41,8 +41,8 @@ jobs:
           ECR_REPOSITORY: my-ecr
           IMAGE_TAG: ${{ steps.image.outputs.version }}
         run: |
-          echo "ecr_repository=$ECR_REPOSITORY" >> $GITHUB_OUTPUT
-          echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "::set-output name=ecr_repository::$ECR_REPOSITORY"
+          echo "::set-output name=image_tag::$IMAGE_TAG"
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
@@ -56,17 +56,17 @@ jobs:
     runs-on: ubuntu-latest
     env:
       IMAGE_TAG: ${{ needs.build.outputs.image_tag }}
-      GIT_ACCESS_TOKEN: ${{ secrets.MANIFEST_PAT }}
+      GIT_ACCESS_TOKEN: ${{ secrets.MENIFEST_TAP }}
       HASH: ${{ needs.build.outputs.sha }}
-      GIT_REPO: kimwoosung-debug/aws-manifest-repo
+      GIT_REPO: kimwoosung/aws-manifest-repo                       # 각자의 repo 주소로 업데이트 필요
 
     steps:
       - name: Clone Deploy repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
         with:
           repository: ${{ env.GIT_REPO }}
           ref: 'main'
-          token: ${{ secrets.MENIFEST_PAT }}
+          token: ${{ env.GIT_ACCESS_TOKEN }}
 
       - name: Image Tag Change
         uses: mikefarah/yq@v4.9.6
@@ -75,7 +75,7 @@ jobs:
 
       - name: Create Pull Request
         id: cpr
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v3
         with:
           token: ${{ env.GIT_ACCESS_TOKEN }}
           commit-message: 'deploy: game2048-${{ env.HASH }}'
